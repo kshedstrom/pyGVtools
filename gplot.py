@@ -60,8 +60,8 @@ def parseCommandLine():
       When VALUE, START or STOP are positive integers, they refer to indices (START at 1).
       In the range form (with a colon), a missing START or STOP will indicate the beginning or
       end of the dimension.
-      An inverted range (START>STOP) indicates to wrap around a periodic dimension. 
-      Any of VALUE, START or STOP can take the form '=POS' or '=POS1:POS2' in which case POS, POS1 and POS2 
+      An inverted range (START>STOP) indicates to wrap around a periodic dimension.
+      Any of VALUE, START or STOP can take the form '=POS' or '=POS1:POS2' in which case POS, POS1 and POS2
       are coordinate values or ranges.
       ''')
   parser.add_argument('-cm','--colormap', type=str, default='',
@@ -124,9 +124,9 @@ def createUI(fileVarSlice, args):
   """
 
   # Extract file, variable and slice specs from fileVarSlice
-  if debug: print 'createUI: fileVarSlice=',fileVarSlice
+  if debug: print('createUI: fileVarSlice=',fileVarSlice)
   (fileName, variableName, sliceSpecs) = splitFileVarPos(fileVarSlice)
-  if debug: print 'createUI: fileName=',fileName,'variableName=',variableName,'sliceSpecs=',sliceSpecs
+  if debug: print('createUI: fileName=',fileName,'variableName=',variableName,'sliceSpecs=',sliceSpecs)
 
   # Read the meta-data for elevation, if asked for (needed for section plots)
   if args.elevation:
@@ -134,7 +134,7 @@ def createUI(fileVarSlice, args):
     else: (elevFileName, elevVariableName, elevSliceSpecs) = splitFileVarPos(args.elevation)
     if elevSliceSpecs==None: elevSliceSpecs = sliceSpecs
     if elevVariableName==None: elevVariableName='elevation'
-    if debug: print 'elevFileName=',elevFileName,'eName=',elevVariableName,'eSlice=',elevSliceSpecs
+    if debug: print('elevFileName=',elevFileName,'eName=',elevVariableName,'eSlice=',elevSliceSpecs)
     eRg, eVar = readVariableFromFile(elevFileName, elevVariableName, elevSliceSpecs,
         ignoreCoords=args.indices, alternativeNames=['elev', 'e', 'h'])
     global global_eVar
@@ -172,12 +172,12 @@ def createUI(fileVarSlice, args):
         if n==n0: plt.show(block=False)
         else: plt.draw()
   elif var.rank>2:
-    summarizeFile(rg); print
+    summarizeFile(rg); print()
     raise MyError( 'Variable name "%s" has resolved rank %i. Only 1D and 2D data can be plotted until you buy a holographic display.'%(variableName, var.rank))
   else:
     render(var, args, elevation=eVar)
     if not args.output: plt.show()
-  
+
 
 def render(var, args, elevation=None, frame=0):
   var.getData() # Actually read data from file
@@ -191,16 +191,16 @@ def render(var, args, elevation=None, frame=0):
   if args.scale:
     var.data = args.scale * var.data
 
-  if args.list: print 'createUI: Data =\n',var.data
+  if args.list: print('createUI: Data =\n',var.data)
   if args.stats:
     dMin = np.min(var.data); dMax = np.max(var.data)
     if dMin==0 and dMax>0:
       dMin = np.min(var.data[var.data!=0])
-      print 'Mininum=',dMin,'(ignoring zeros) Maximum=',dMax
+      print('Mininum=',dMin,'(ignoring zeros) Maximum=',dMax)
     elif dMax==0 and dMin<0:
       dMax = np.max(var.data[var.data!=0])
-      print 'Mininum=',dMin,'Maximum=',dMax,'(ignoring zeros)'
-    else: print 'Mininum=',dMin,'Maximum=',dMax
+      print('Mininum=',dMin,'Maximum=',dMax,'(ignoring zeros)')
+    else: print('Mininum=',dMin,'Maximum=',dMax)
 
   if args.offset: var.data = var.data + args.offset
   if args.log10: var.data = np.log10(var.data)
@@ -208,8 +208,8 @@ def render(var, args, elevation=None, frame=0):
   # Now plot
   if var.rank==0:
     for d in var.allDims:
-      print '%s = %g %s'%(d.name,d.values[0],d.units)
-    print var.vname+' = ',var.data,'   '+var.units
+      print('%s = %g %s'%(d.name,d.values[0],d.units))
+    print(var.vname+' = ',var.data,'   '+var.units)
     exit(0)
   elif var.rank==1: # Line plot
     if var.dims[0].isZaxis: # Transpose 1d plot
@@ -241,11 +241,11 @@ def render(var, args, elevation=None, frame=0):
         else:
           xCoord, xLims = readOSvar(args.oceanstatic, 'geolon_c', var.dims)
           yCoord, yLims = readOSvar(args.oceanstatic, 'geolat_c', var.dims)
-          xLabel = u'Longitude (\u00B0E)' ; yLabel = u'Latitude (\u00B0N)'
+          xLabel = 'Longitude (\u00B0E)' ; yLabel = 'Latitude (\u00B0N)'
       else:
         xCoord, xLims = readSGvar(args.supergrid, 'x', var.dims)
         yCoord, yLims = readSGvar(args.supergrid, 'y', var.dims)
-        xLabel = u'Longitude (\u00B0E)' ; yLabel = u'Latitude (\u00B0N)'
+        xLabel = 'Longitude (\u00B0E)' ; yLabel = 'Latitude (\u00B0N)'
       zData = var.data
       yDim = var.dims[0]
     if yDim.isZaxis and not elevation==None: # Z on y axis ?
@@ -281,8 +281,8 @@ def render(var, args, elevation=None, frame=0):
     if args.animate:
       dt = time.time() - start_time
       nf = var.singleDims[0].initialLen
-      print 'Writing file "%s" (%i/%i)'%(args.output%(frame),frame,nf), \
-            'Elapsed %.1fs, %.2f FPS, total %.1fs, remaining %.1fs'%(dt, frame/dt, 1.*nf/frame*dt, (1.*nf/frame-1.)*dt)
+      print('Writing file "%s" (%i/%i)'%(args.output%(frame),frame,nf), \
+            'Elapsed %.1fs, %.2f FPS, total %.1fs, remaining %.1fs'%(dt, frame/dt, 1.*nf/frame*dt, (1.*nf/frame-1.)*dt))
       try: plt.savefig(args.output%(frame),pad_inches=0.)
       except: raise MyError('output filename must contain %D.Di when animating')
     else: plt.savefig(args.output,pad_inches=0.)
@@ -292,7 +292,7 @@ def render(var, args, elevation=None, frame=0):
     if var.rank==1:
       def statusMesg(x,y):
         # -1 needed because of extension for pcolormesh
-        i = min(range(len(xCoord)-1), key=lambda l: abs(xCoord[l]-x))
+        i = min(list(range(len(xCoord)-1)), key=lambda l: abs(xCoord[l]-x))
         if not i==None:
           val = yData[i]
           if val is np.ma.masked: return 'x=%.3f  %s(%i)=NaN'%(x,var.vname,i+1)
@@ -302,8 +302,8 @@ def render(var, args, elevation=None, frame=0):
       def statusMesg(x,y):
         if len(xCoord.shape)==1:
           # -2 needed because of coords are for vertices and need to be averaged to centers
-          i = min(range(len(xCoord)-2), key=lambda l: abs((xCoord[l]+xCoord[l+1])/2.-x))
-          j = min(range(len(yCoord)-2), key=lambda l: abs((yCoord[l]+yCoord[l+1])/2.-y))
+          i = min(list(range(len(xCoord)-2)), key=lambda l: abs((xCoord[l]+xCoord[l+1])/2.-x))
+          j = min(list(range(len(yCoord)-2)), key=lambda l: abs((yCoord[l]+yCoord[l+1])/2.-y))
         else:
           idx = np.abs( np.fabs( xCoord[0:-1,0:-1]+xCoord[1:,1:]+xCoord[0:-1,1:]+xCoord[1:,0:-1]-4*x)
               +np.fabs( yCoord[0:-1,0:-1]+yCoord[1:,1:]+yCoord[0:-1,1:]+yCoord[1:,0:-1]-4*y) ).argmin()
@@ -341,7 +341,7 @@ def readVariableFromFile(fileName, variableName, sliceSpecs, ignoreCoords=False,
   # Open netcdf file
   try: rg = MFDataset(fileName, 'r', aggdim='time')
   except:
-    if debug: print 'Unable to open %s with MFDataset'%(fileName)
+    if debug: print('Unable to open %s with MFDataset'%(fileName))
     try: rg = Dataset(fileName, 'r')
     except:
       if os.path.isfile(fileName): raise MyError('There was a problem opening "'+fileName+'".')
@@ -349,8 +349,8 @@ def readVariableFromFile(fileName, variableName, sliceSpecs, ignoreCoords=False,
 
   # If no variable is specified, summarize the file contents and exit
   if not variableName:
-    print 'No variable name specified! Specify a varible from the following summary of "'\
-          +fileName+'":\n'
+    print('No variable name specified! Specify a varible from the following summary of "'\
+          +fileName+'":\n')
     summarizeFile(rg)
     exit(0)
 
@@ -362,7 +362,7 @@ def readVariableFromFile(fileName, variableName, sliceSpecs, ignoreCoords=False,
     if variableName.lower() == v.lower(): variableName=v ; break
   if not variableName in rg.variables:
     if alternativeNames==None:
-      print 'Known variables in file: '+''.join( (str(v)+', ' for v in rg.variables) )
+      print('Known variables in file: '+''.join( (str(v)+', ' for v in rg.variables) ))
       raise MyError('Did not find "'+variableName+'" in file "'+fileName+'".')
     else:
       for v in alternativeNames:
@@ -392,16 +392,16 @@ class NetcdfDim:
           )                          # Any of the three previous groups is optional but at least one is needed
           (?P<excess>.*)             # Nothing else is allowed but this will catch anything else
           """, sliceSpec, re.VERBOSE)
-    if debug: print 'NetcdfDim: Interpretting "%s", groups='%(sliceSpec),equalsSplit.groups()
+    if debug: print('NetcdfDim: Interpretting "%s", groups='%(sliceSpec),equalsSplit.groups())
     lhsEquals, lhs, equals, rhs, low, colon, high, excess = equalsSplit.groups()
     if len(excess)>0: raise MyError('Syntax error: could not interpret "'+sliceSpec+'".')
     if len(rhs)==0: raise MyError('Syntax error: could not find range on RHS of "'+sliceSpec+'".')
     if debug:
-      print 'NetcdfDim: Interpretting "%s", name = "%s"' % (sliceSpec, lhs)
-      print 'NetcdfDim: Interpretting "%s", equals provided "%s"' % (sliceSpec, equals)
-      print 'NetcdfDim: Interpretting "%s", ranges provided "%s"' % (sliceSpec, colon)
-      print 'NetcdfDim: Interpretting "%s", low range "%s"' % (sliceSpec, low)
-      print 'NetcdfDim: Interpretting "%s", high range "%s"' % (sliceSpec, high)
+      print('NetcdfDim: Interpretting "%s", name = "%s"' % (sliceSpec, lhs))
+      print('NetcdfDim: Interpretting "%s", equals provided "%s"' % (sliceSpec, equals))
+      print('NetcdfDim: Interpretting "%s", ranges provided "%s"' % (sliceSpec, colon))
+      print('NetcdfDim: Interpretting "%s", low range "%s"' % (sliceSpec, low))
+      print('NetcdfDim: Interpretting "%s", high range "%s"' % (sliceSpec, high))
     dimensionHandle = rootGroup.dimensions[dimensionName]
     self.isZaxis = False
     self.positiveDown = None
@@ -447,16 +447,16 @@ class NetcdfDim:
       if low=='': indexBegin = 0; fLow = cMin
       else:
         fLow = float(low)
-        indexBegin = min(range(len(dimensionValues)), key=lambda i: abs(dimensionValues[i]-fLow))
+        indexBegin = min(list(range(len(dimensionValues))), key=lambda i: abs(dimensionValues[i]-fLow))
         if indexBegin==0 and isLongitude and float(low)<cMin:
-          indexBegin = min(range(len(dimensionValues)), key=lambda i: abs(dimensionValues[i]-fLow-360.))
+          indexBegin = min(list(range(len(dimensionValues))), key=lambda i: abs(dimensionValues[i]-fLow-360.))
       if colon==None: indexEnd = indexBegin
       else:
         if high=='': indexEnd = len(dimensionHandle) - 1
         else:
-          indexEnd = min(range(len(dimensionValues)), key=lambda i: abs(dimensionValues[i]-float(high)))
+          indexEnd = min(list(range(len(dimensionValues))), key=lambda i: abs(dimensionValues[i]-float(high)))
           if indexEnd==len(dimensionValues)-1 and isLongitude and float(high)>cMax:
-            indexEnd = min(range(len(dimensionValues)), key=lambda i: abs(dimensionValues[i]-float(high)+360.))
+            indexEnd = min(list(range(len(dimensionValues))), key=lambda i: abs(dimensionValues[i]-float(high)+360.))
           if indexEnd==indexBegin and abs(float(high)-fLow)>0:
             if indexEnd>0: indexEnd = indexEnd - 1
             else: indexBegin = indexBegin + 1
@@ -482,7 +482,7 @@ class NetcdfDim:
     #if not self.values==None: return # Already read
     if self.values==None or forceRead: # If the handle is None then the values were created already
       if self.dimensionVariableHandle==None:
-        self.values = np.array(range(self.slice1.start, self.slice1.stop)) + 1
+        self.values = np.array(list(range(self.slice1.start, self.slice1.stop))) + 1
       else:
         if self.slice2:
           cMin = 1.5*self.dimensionVariableHandle[0] - 0.5*self.dimensionVariableHandle[1]
@@ -494,7 +494,7 @@ class NetcdfDim:
       cMax = 1.5*self.values[-1] - 0.5*self.values[-2]
     else: cMin = self.values[0]; cMax = cMin
     self.limits = (cMin, cMax)
-    if debug: print 'NetcdfDim.getData: ',self
+    if debug: print('NetcdfDim.getData: ',self)
   def __repr__(self):
     return 'len=%i, name="%s", units=%s, label="%s"'%(self.len, self.name, self.units, self.label)+' min/max='+repr(self.limits)+' slice1='+repr(self.slice1)+' slice2='+repr(self.slice2) #+' values='+repr(self.values)
 
@@ -509,14 +509,14 @@ class NetcdfSlice:
     on that corresponding subset of data
     """
     variableHandle = rootGroup.variables[variableName]
-    if debug: print 'NetcdfSlice: variableName=',variableName
+    if debug: print('NetcdfSlice: variableName=',variableName)
     variableDims = variableHandle.dimensions
-    if debug: print 'NetcdfSlice: variableDims=',variableDims
+    if debug: print('NetcdfSlice: variableDims=',variableDims)
     if not (sliceSpecs==None) and len(sliceSpecs)>len(variableDims):
       raise MyError('Too many coordinate slices specified! Variable "'+variableName+
           '" has %i dimensions but you specified %i.'
           % ( len(variableDims), len(sliceSpecs) ) )
-  
+
     # Separate provided slices into named and general
     namedSlices = []; generalSlices = []
     reGen = re.compile('[a-zA-Z_]')
@@ -525,9 +525,9 @@ class NetcdfSlice:
         if reGen.match(s): namedSlices.append(s)
         else: generalSlices.append(s)
     if debug:
-      print 'NetcdfSlice: generalSlices=',generalSlices
-      print 'NetcdfSlice: namedSlices=',namedSlices
-  
+      print('NetcdfSlice: generalSlices=',generalSlices)
+      print('NetcdfSlice: namedSlices=',namedSlices)
+
     # Rebuild sliceSpecs by matching each of the variables actual dimensions to a named or general slice
     sliceSpecs = []
     for d in variableDims:
@@ -543,11 +543,11 @@ class NetcdfSlice:
         del generalSlices[0]
       if not thisSlice: thisSlice = ':' # If we ran out of general slices use a default "all" slice
       sliceSpecs.append(thisSlice)
-    if debug: print 'NetcdfSlice: sliceSpecs=',sliceSpecs
+    if debug: print('NetcdfSlice: sliceSpecs=',sliceSpecs)
     if len(namedSlices): raise MyError('The named dimension in "%s" is not a dimension of the variable "%s".'
                                 % (namedSlices[0], variableName) )
     if len(generalSlices): raise MyError('There is an impossible problem. I should probably be debugged.')
-  
+
     # Now interpret the slice specification for each dimensions
     dims=[]
     for d,s in zip(variableDims, sliceSpecs):
@@ -663,7 +663,7 @@ def splitFileVarPos(string):
   m = re.match('([\w\.~/\*\-\[\]]+)[,:]?(.*)',string)
   fName = m.group(1)
   (vName, pSpecs) = splitVarPos(m.group(2))
-  if debug: print 'splitFileVarPos: fName=',fName,'vName=',vName,'pSpecs=',pSpecs
+  if debug: print('splitFileVarPos: fName=',fName,'vName=',vName,'pSpecs=',pSpecs)
   return fName, vName, pSpecs
 
 
@@ -683,7 +683,7 @@ def splitVarPos(string):
     if m:
       vName = m.group(1)
       if m.group(4): pSpecs = m.group(4).split(',')
-  if debug: print 'splitVarPos: vName=',vName,'pSpecs=',pSpecs
+  if debug: print('splitVarPos: vName=',vName,'pSpecs=',pSpecs)
   return vName, pSpecs
 
 
@@ -709,7 +709,7 @@ def constructLabel(ncObj, default=''):
     units = str(ncObj.units)
     label += ' ('+units+')'
   if len(label)==0: label = default+' (index)'
-  if debug: print 'constructLabel: label,name,units=', label, name, units
+  if debug: print('constructLabel: label,name,units=', label, name, units)
   return label, name ,units
 
 
@@ -736,7 +736,7 @@ def makeGuessAboutCmap(clim=None, colormap=None):
     if -vmin<vmax and -vmin/vmax>cutOffFrac: vmin=-vmax
     elif -vmin>vmax and -vmax/vmin>cutOffFrac: vmax=-vmin
   if vmin==vmax:
-    if debug: print 'vmin,vmax=',vmin,vmax
+    if debug: print('vmin,vmax=',vmin,vmax)
     vmin = vmin - 1; vmax = vmax + 1
   plt.clim(vmin,vmax)
   if colormap: plt.set_cmap(colormap)
@@ -744,16 +744,16 @@ def makeGuessAboutCmap(clim=None, colormap=None):
     if vmin*vmax>=0 and vmax>0 and 3*vmin<vmax: plt.set_cmap('hot') # Single signed +ve data
     elif vmin*vmax>=0 and vmin<0 and 3*vmax>vmin: plt.set_cmap('hot_r') # Single signed -ve data
     elif abs((vmax+vmin)/(vmax-vmin))<.01: plt.set_cmap('seismic') # Multi-signed symmetric data
-    else: plt.set_cmap('spectral')
+    else: plt.set_cmap('nipy_spectral')
   landColor=[.5,.5,.5]
-  plt.gca().set_axis_bgcolor(landColor)
+  plt.gca().set_facecolor(landColor)
   return (vmin, vmax)
 
 
 # Generate a succinct summary of the netcdf file contents
 def summarizeFile(rg):
   dims = rg.dimensions; vars = rg.variables
-  print 'Dimensions:'
+  print('Dimensions:')
   for dim in dims:
     oString = ' '+dim+' ['+str(len( dims[dim] ))+']'
     if dim in vars:
@@ -762,8 +762,8 @@ def summarizeFile(rg):
       else: oString += ' = '+str(obj[:])
       if 'long_name' in obj.ncattrs(): oString += ' "'+obj.long_name+'"'
       if 'units' in obj.ncattrs(): oString += ' ('+obj.units+')'
-    print oString
-  print; print 'Variables:'
+    print(oString)
+  print(); print('Variables:')
   for var in vars:
     if var in dims: continue # skip listing dimensions as variables
     oString = ' '+var+' [ '; dString = ''
@@ -774,7 +774,7 @@ def summarizeFile(rg):
     oString += dString+' ]'
     if 'long_name' in obj.ncattrs(): oString += ' "'+obj.long_name+'"'
     if 'units' in obj.ncattrs(): oString += ' ('+obj.units+')'
-    print oString
+    print(oString)
 
 
 # Calculate a new window by scaling the current window, centering
@@ -925,12 +925,12 @@ def enableDebugging(newValue=True):
 
 
 def unittests(args):
-  print splitFileVarPos('file.nc')
-  print splitFileVarPos('file.nc,variable')
-  print splitFileVarPos('file.nc,variable,:')
-  print splitFileVarPos('file.nc,variable,=-1:4,:')
-  print splitFileVarPos('file.nc,variable(S,T),=-1:4,:')
-  print splitFileVarPos(args.file_var_slice)
+  print(splitFileVarPos('file.nc'))
+  print(splitFileVarPos('file.nc,variable'))
+  print(splitFileVarPos('file.nc,variable,:'))
+  print(splitFileVarPos('file.nc,variable,=-1:4,:'))
+  print(splitFileVarPos('file.nc,variable(S,T),=-1:4,:'))
+  print(splitFileVarPos(args.file_var_slice))
 
 
 # Invoke parseCommandLine(), the top-level prodedure
