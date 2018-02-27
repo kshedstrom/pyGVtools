@@ -480,7 +480,14 @@ class NetcdfDim:
     Read dimension variable data if it has not been read
     """
     #if not self.values==None: return # Already read
-    if self.values==None or forceRead: # If the handle is None then the values were created already
+    #print("self.values", self.values, forceRead)
+    values_None = False
+    try:
+      if self.values==None:
+        values_None = True
+    except:
+      pass
+    if values_None or forceRead: # If the handle is None then the values were created already
       if self.dimensionVariableHandle==None:
         self.values = np.array(list(range(self.slice1.start, self.slice1.stop))) + 1
       else:
